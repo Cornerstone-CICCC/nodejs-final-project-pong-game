@@ -39,7 +39,7 @@ const PORT = process.env.PORT || 3000
 const MONGODB_URI = process.env.DATABASE_URI!
 
 mongoose
-    .connect(MONGODB_URI, { dbName: 'pongDb' })
+    .connect(MONGODB_URI, { dbName: 'pong_game' })
     .then(() => {
         console.log(`Connected to MongoDB`)
         app.listen(PORT, () => {
