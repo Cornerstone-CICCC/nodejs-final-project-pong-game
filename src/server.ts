@@ -21,7 +21,7 @@ app.use(cookieSession({
         SIGN_KEY,
         ENCRYPT_KEY
     ],
-    maxAge: 5 * 60 * 1000
+    maxAge: 15 * 24 * 60 * 1000
 }))
 
 //Routes

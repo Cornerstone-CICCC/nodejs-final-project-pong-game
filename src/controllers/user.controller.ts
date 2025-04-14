@@ -29,23 +29,6 @@ const getUserById = async (req: Request<{ id: string }>, res: Response) => {
     }
 }
 
-//get User By Username   
-const getUsersByUsername = async (req: Request<{}, {}, {}, { username: string }>, res: Response) => {
-    try {
-        const { username } = req.query
-        const users = await User.find({
-            username: {
-                $regex: username,
-                $options: 'i'
-            }
-        })
-        res.status(200).json(users)
-    } catch (err) {
-        console.error(err)
-        res.status(500).send({ message: "Unable to find User with searched username." })
-    }
-}
-
 //Delete user By Id
 const deleteUserById = async (req: Request<{ id: string }>, res: Response) => {
     try {
@@ -61,8 +44,23 @@ const deleteUserById = async (req: Request<{ id: string }>, res: Response) => {
 const createUser = async (req: Request<{}, {}, IUser>, res: Response) => {
     try {
         const { username, password, message } = req.body
+
+        const existUser = await User.exists({ username })
+
+        if (existUser) {
+            res.status(400).json({ message: "Username is already in use" })
+            return
+        }
+
         const hashedPassword = await bcrypt.hash(password, 12)
-        const user = await User.create({ username, password: hashedPassword, message })
+        const user = await User.create({
+            username,
+            password: hashedPassword,
+            message,
+            win: 0,
+            lose: 0,
+            scores: 0
+        })
         res.status(201).json(user)
     } catch (err) {
         console.error(err)
@@ -97,10 +95,8 @@ const loginUser = async (req: Request, res: Response) => {
         }
 
         if (isValid === true) {
-
-            req.session.user = {
-                username: user.username
-            }
+            req.session.isLoggedIn = true
+            // req.session.username = user.username
         }
 
 
@@ -119,14 +115,17 @@ const logoutUser = (req: Request, res: Response) => {
 //Updates user by id
 const updateUserById = async (req: Request<{ id: string }, {}, Partial<IUser>>, res: Response) => {
     try {
-        const { username, password, message } = req.body
+        const { username, password, message, win, lose, scores } = req.body
 
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 12)
             const updateUser = {
                 username: username,
                 password: hashedPassword,
-                message: message
+                message: message,
+                win: win,
+                lose: lose,
+                scores: scores
             }
             const user = await User.findByIdAndUpdate(req.params.id, updateUser, {
                 new: true
@@ -137,7 +136,10 @@ const updateUserById = async (req: Request<{ id: string }, {}, Partial<IUser>>, 
         // const hashedPassword = await bcrypt.hash(password, 12)
         const updateUser = {
             username: username,
-            message: message
+            message: message,
+            win: win,
+            lose: lose,
+            scores: scores
         }
         const user = await User.findByIdAndUpdate(req.params.id, updateUser, {
             new: true
@@ -149,13 +151,47 @@ const updateUserById = async (req: Request<{ id: string }, {}, Partial<IUser>>, 
     }
 }
 
+//Updates user by id
+const updateUserStatusById = async (req: Request<{ id: string }, {}, Partial<IUser>>, res: Response) => {
+    try {
+        const { win, lose, scores } = req.body
+
+        const updateUser = {
+            win: win,
+            lose: lose,
+            scores: scores
+        }
+        const user = await User.findByIdAndUpdate(req.params.id, updateUser, {
+            new: true
+        })
+        res.status(200).json(user)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: "Unable to update user status" })
+    }
+}
+
+const checkCookie = (req: Request, res: Response) => {
+    if (req.session && req.session.isLoggedIn) {
+        res.status(200).json({
+            message: req.session.isLoggedIn
+        })
+        return
+    }
+    res.status(500).json({
+        content: 'No cookies, have to login!'
+    })
+}
+
+
 export default {
     createUser,
     getAllUsers,
     getUserById,
     updateUserById,
+    updateUserStatusById,
     deleteUserById,
-    getUsersByUsername,
     loginUser,
-    logoutUser
+    logoutUser,
+    checkCookie
 }
