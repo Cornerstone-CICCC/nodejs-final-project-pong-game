@@ -25,13 +25,14 @@ app.use(
   cookieSession({
     name: 'Session',
     keys: [SIGN_KEY, ENCRYPT_KEY],
-    maxAge: 5 * 60 * 1000,
+    maxAge: 15 * 24 * 60 * 1000,
   })
 );
 
 //Routes
 app.use('/users', userRouter);
 app.use('/histories', historyRouter);
+
 
 //Fallback
 app.use((req: Request, res: Response) => {
