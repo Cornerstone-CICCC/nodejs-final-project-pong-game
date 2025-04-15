@@ -5,6 +5,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import cookieSession from 'cookie-session';
 import userRouter from './routes/user.route';
+import historyRouter from './routes/history.routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import roomsSocket from './socket/room.socket';
@@ -30,6 +31,8 @@ app.use(
 
 //Routes
 app.use('/users', userRouter);
+app.use('/histories', historyRouter);
+
 
 //Fallback
 app.use((req: Request, res: Response) => {
