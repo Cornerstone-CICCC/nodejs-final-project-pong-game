@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import { History, IHistory } from "../models/history.model";
-import { error } from "console";
+import { Request, Response } from 'express';
+import { History, IHistory } from '../models/history.model';
+import { error } from 'console';
 
 // Get all historys
 const getAllHistorys = async (req: Request, res: Response) => {
@@ -9,7 +9,7 @@ const getAllHistorys = async (req: Request, res: Response) => {
     res.status(200).json(historys);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "unable" });
+    res.status(500).json({ message: 'unable' });
   }
 };
 
@@ -21,21 +21,22 @@ const getHistoryById = async (req: Request, res: Response) => {
     }).sort({ date: 1 }); // 1 for ascending order
 
     if (!histories || histories.length === 0) {
-      res.status(404).json({ message: "No history found for this user" });
+      res.status(404).json({ message: 'No history found for this user' });
       return;
     }
 
     res.status(200).json(histories);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Unable to get history" });
+    res.status(500).json({ message: 'Unable to get history' });
   }
 };
 
 // Create new history
 const createHistory = async (req: Request, res: Response) => {
   try {
-    const { history_id, user_id, opponent_user_id, own_score, opponent_score } = req.body;
+    const { history_id, user_id, opponent_user_id, own_score, opponent_score } =
+      req.body;
     const history = await History.create({
       history_id,
       user_id,
@@ -47,7 +48,7 @@ const createHistory = async (req: Request, res: Response) => {
     res.status(201).json(history);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Unable to create history" });
+    res.status(500).json({ message: 'Unable to create history' });
   }
 };
 
@@ -63,7 +64,7 @@ const updateHistoryById = async (
     res.status(200).json(history);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Unable to update history" });
+    res.status(500).json({ message: 'Unable to update history' });
   }
 };
 
@@ -77,7 +78,7 @@ const deleteHistoryById = async (
     res.status(200).json(history);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Unable to delete history" });
+    res.status(500).json({ message: 'Unable to delete history' });
   }
 };
 

@@ -1,4 +1,5 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/ytRKE8ed)
+
 # NodeJS - Final Project (Full-Stack Application)
 
 **Goal:** Create a full-stack CRUD application of your choosing using NodeJS, Express, and Socket.io with Postgres or MongoDB as the database.
@@ -14,10 +15,10 @@
 
 ## Some Ideas 💡
 
-- Multi-user chat app with rooms and you can also send messages directly to another user *(similar to Slack)*
-- Document real-time collaboration *(similar to Google Docs)*
+- Multi-user chat app with rooms and you can also send messages directly to another user _(similar to Slack)_
+- Document real-time collaboration _(similar to Google Docs)_
 - 2D-based multiplayer game where you can see players move in real time.
-- Real-time data fetching and display *(stock market graph tracker)*
+- Real-time data fetching and display _(stock market graph tracker)_
 
 ## Instructions 📖
 
@@ -26,4 +27,4 @@
 3. Design your application in Figma. Do not overcomplicate the design and try to create something that you can build in a few days.
 4. Once you are done with the development, create a pull request to your main branch and merge.
 
-*Good luck! 🙌*
+_Good luck! 🙌_

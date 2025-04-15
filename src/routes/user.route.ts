@@ -1,17 +1,17 @@
-import { Router } from 'express'
-import userController from '../controllers/user.controller'
-import { requireAuth } from '../middlewares/auth.middleware'
+import { Router } from 'express';
+import userController from '../controllers/user.controller';
+import { requireAuth } from '../middlewares/auth.middleware';
 
-const userRouter = Router()
+const userRouter = Router();
 
-userRouter.get('/', userController.getAllUsers)
-userRouter.post('/login', userController.loginUser)
-userRouter.get('/logout', userController.logoutUser)
-userRouter.post('/', userController.createUser)
-userRouter.get('/check-auth', userController.checkCookie)
-userRouter.delete('/:id', userController.deleteUserById)
-userRouter.get('/:id', userController.getUserById)
-userRouter.put('/:id', requireAuth, userController.updateUserById)
-userRouter.put('/status/:id', userController.updateUserStatusById)
+userRouter.get('/', userController.getAllUsers);
+userRouter.post('/login', userController.loginUser);
+userRouter.get('/logout', userController.logoutUser);
+userRouter.post('/', userController.createUser);
+userRouter.get('/check-auth', userController.checkCookie);
+userRouter.delete('/:id', userController.deleteUserById);
+userRouter.get('/:id', userController.getUserById);
+userRouter.put('/:id', requireAuth, userController.updateUserById);
+userRouter.put('/status/:id', userController.updateUserStatusById);
 
-export default userRouter
+export default userRouter;

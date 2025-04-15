@@ -1,14 +1,14 @@
-import express, { Request, Response } from "express";
-import dotenv from "dotenv";
+import express, { Request, Response } from 'express';
+import dotenv from 'dotenv';
 dotenv.config();
-import cors from "cors";
-import mongoose from "mongoose";
-import cookieSession from "cookie-session";
-import userRouter from "./routes/user.route";
-import historyRouter from "./routes/history.routes";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import roomsSocket from "./socket/room.socket";
+import cors from 'cors';
+import mongoose from 'mongoose';
+import cookieSession from 'cookie-session';
+import userRouter from './routes/user.route';
+import historyRouter from './routes/history.routes';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import roomsSocket from './socket/room.socket';
 
 //Create server
 const app = express();
@@ -19,39 +19,39 @@ app.use(express.json());
 const SIGN_KEY = process.env.COOKIE_SIGN_KEY;
 const ENCRYPT_KEY = process.env.COOKIE_ENCRYPT_KEY;
 if (!SIGN_KEY || !ENCRYPT_KEY) {
-  throw new Error("Missing cookie keys");
+  throw new Error('Missing cookie keys');
 }
 app.use(
   cookieSession({
-    name: "Session",
+    name: 'Session',
     keys: [SIGN_KEY, ENCRYPT_KEY],
     maxAge: 5 * 60 * 1000,
   })
 );
 
 //Routes
-app.use("/users", userRouter);
-app.use("/histories", historyRouter);
+app.use('/users', userRouter);
+app.use('/histories', historyRouter);
 
 //Fallback
 app.use((req: Request, res: Response) => {
-  res.status(404).send("404 server error. Page not found.");
+  res.status(404).send('404 server error. Page not found.');
 });
 
 //Create server and link with Socket.IO
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http:localhost:5173",
-    methods: ["GET", "POST"],
+    origin: 'http:localhost:5173',
+    methods: ['GET', 'POST'],
   },
 });
 //Connect to MongoDb
 const MONGODB_URI = process.env.DATABASE_URI!;
 mongoose
-  .connect(MONGODB_URI, { dbName: "pong_game" })
+  .connect(MONGODB_URI, { dbName: 'pong_game' })
   .then(() => {
-    console.log("Connected to MongoDB database");
+    console.log('Connected to MongoDB database');
 
     //Start socket
     roomsSocket(io);
@@ -62,6 +62,6 @@ mongoose
       console.log(`Server is running on http://localhost:${PORT}`);
     });
   })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
+  .catch(error => {
+    console.error('Error connecting to MongoDB:', error);
   });

@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 export interface IHistory extends Document {
   user_id: string;
   opponent_user_id: string;
@@ -15,4 +15,4 @@ const HistorySchema: Schema = new Schema({
   date: { type: Date, default: Date.now },
 });
 
-export const History = mongoose.model<IHistory>("History", HistorySchema);
+export const History = mongoose.model<IHistory>('History', HistorySchema);
