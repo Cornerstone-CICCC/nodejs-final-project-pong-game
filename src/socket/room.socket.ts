@@ -28,7 +28,7 @@ const roomsSocket = (io: Server) => {
         socket.on('leave room', async (room) => {
             const socketsInRoom = (await io.in(room).fetchSockets()).length
 
-            if (socketsInRoom <= 0) {
+            if (socketsInRoom <= 1) {
                 socket.leave(room)
                 socket.emit('delete room', room)
                 return
