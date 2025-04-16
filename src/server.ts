@@ -9,6 +9,8 @@ import historyRouter from './routes/history.routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import roomsSocket from './socket/room.socket';
+import roomRouter from './routes/room.routes';
+import userRoomRouter from './routes/user_room.routes';
 
 //Create server
 const app = express();
@@ -32,7 +34,8 @@ app.use(
 //Routes
 app.use('/users', userRouter);
 app.use('/histories', historyRouter);
-
+app.use('/rooms', roomRouter);
+app.use('/userrooms', userRoomRouter);
 
 //Fallback
 app.use((req: Request, res: Response) => {

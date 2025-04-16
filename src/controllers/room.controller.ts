@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { Room, IRoom } from '../models/room.model';
+import { UserRoom } from '../models/user_room.model';
+
 import { error } from 'console';
 
 // Get all rooms
@@ -33,11 +35,29 @@ const getRoomById = async (req: Request<{ id: string }>, res: Response) => {
 // Create new room
 const createRoom = async (req: Request, res: Response) => {
   try {
-    const { room_name } = req.body;
-    const room = await Room.create({
-      room_name,
-    });
-    res.status(201).json(room);
+    const { room_name, creator_user_id } = req.body;
+    if (!room_name || !creator_user_id) {
+      res
+        .status(400)
+        .json({ message: 'Room name and creator user ID are required' });
+    } else {
+      const room = await Room.create({
+        room_name,
+      });
+
+      try {
+        await UserRoom.create({
+          room_id: room._id,
+          creator_user_id,
+          opponent_user_id: null,
+        });
+      } catch (userRoomError) {
+        await Room.findByIdAndDelete(room._id);
+        throw userRoomError;
+      }
+
+      res.status(201).json(room);
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Unable to create room' });
