@@ -22,6 +22,7 @@
   "homepage": "https://github.com/Cornerstone-CICCC/nodejs-final-project-pong-game#readme",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.8",
     "@types/cookie-session": "^2.0.49",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
@@ -34,6 +35,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "concurrently": "^9.1.2",
+    "cookie-parser": "^1.4.7",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
