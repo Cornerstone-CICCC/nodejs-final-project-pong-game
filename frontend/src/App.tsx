@@ -1,17 +1,20 @@
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
-import HomePgae from './components/HomePage';
-import backgroundImage from '/pong8.jpg'
+import DestopImage from '../public/background.jpg';
+import Login from './components/Login';
+import Register from './components/Register';
 
 function App() {
   return (
-    <>
-       <div className='bg-cover' style={{backgroundImage: `url(${backgroundImage})`}}>
+    <div
+      className="text-white  h-[100vh] flex justify-center items-center bg-cover "
+      style={{ backgroundImage: `url(${DestopImage})` }}
+    >
       <Routes>
-        <Route path="/" element={<HomePgae />} />
+        <Route path="login" element={<Login />} />
+        <Route path="Register" element={<Register />} />
       </Routes>
-      </div>
-    </>
+    </div>
   );
 }
 
