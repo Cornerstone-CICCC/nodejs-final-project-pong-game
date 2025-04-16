@@ -107,11 +107,10 @@ const leaveRoom = async (req: Request, res: Response) => {
     // owner leave
     else if (userRoom.creator_user_id.toString() === user_id) {
       try {
-        // まず room_id を取得
         const roomId = userRoom.room_id;
         // delete userroom record
         await UserRoom.deleteOne({ _id: user_room_id });
-        // 関連する room レコードも削除
+        // delete room record
         await Room.deleteOne({ _id: roomId });
         res.status(200).json({
           message: 'Creator left and both room and user_room have been deleted',
