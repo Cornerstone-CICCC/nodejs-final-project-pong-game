@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { IUser, User } from '../models/user.model';
+import { Socket } from 'socket.io';
 
 //get all users
 const getAllUsers = async (req: Request, res: Response) => {
@@ -95,7 +96,18 @@ const loginUser = async (req: Request, res: Response) => {
 
     if (isValid === true) {
       req.session.isLoggedIn = true;
-      // req.session.username = user.username
+
+      res.cookie('username', user.username, {
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        signed: true,
+      });
+
+      res.cookie('user_id', user.id, {
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        signed: true,
+      });
     }
 
     res.status(200).json({ message: 'User logged in' });
@@ -107,6 +119,8 @@ const loginUser = async (req: Request, res: Response) => {
 
 const logoutUser = (req: Request, res: Response) => {
   req.session = null;
+  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.status(200).json({ message: 'User logged out!' });
 };
 
@@ -116,7 +130,7 @@ const updateUserById = async (
   res: Response
 ) => {
   try {
-    const { username, password, message, win, lose, scores } = req.body;
+    const { username, password, message } = req.body;
 
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -124,9 +138,6 @@ const updateUserById = async (
         username: username,
         password: hashedPassword,
         message: message,
-        win: win,
-        lose: lose,
-        scores: scores,
       };
       const user = await User.findByIdAndUpdate(req.params.id, updateUser, {
         new: true,
@@ -137,9 +148,6 @@ const updateUserById = async (
     const updateUser = {
       username: username,
       message: message,
-      win: win,
-      lose: lose,
-      scores: scores,
     };
     const user = await User.findByIdAndUpdate(req.params.id, updateUser, {
       new: true,
