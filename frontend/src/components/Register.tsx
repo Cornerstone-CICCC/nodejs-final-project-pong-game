@@ -1,24 +1,67 @@
-import React from 'react';
 import { AiOutlineUnlock } from 'react-icons/ai';
 import { BiUser } from 'react-icons/bi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const Register = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/register`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to register');
+        return;
+      }
+
+      // Registration successful, navigate to login page
+      navigate('/login');
+    } catch (err) {
+      console.error('Error during registration:', err);
+      setError('An unexpected error occurred');
+    }
+  };
+
   return (
     <div className="min-h-screen w-full flex justify-center items-center px-4">
       <div className="bg-slate-800/30 border border-slate-400 rounded-md p-6 sm:p-8 shadow-lg backdrop-filter backdrop-blur-sm relative w-full max-w-md">
         <h1 className="text-4xl text-white font-bold text-center mb-6">
           Register
         </h1>
-        <form>
+        <form onSubmit={handleRegister}>
           <div className="relative my-10">
             <input
-              type="email"
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
               className="peer block w-full appearance-none border-0 border-b-2 border-gray-100 bg-transparent py-2.5 px-0 text-sm text-white focus:border-blue-600 focus:outline-none focus:ring-0"
               placeholder=""
+              required
             />
             <label className="absolute text-sm text-white duration-200 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] left-0 peer-placeholder-shown:translate-y-2.5 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:text-blue-500">
-              Your Email
+              Your Username
             </label>
             <BiUser className="absolute top-4 right-4" />
           </div>
@@ -26,8 +69,11 @@ const Register = () => {
           <div className="relative my-10">
             <input
               type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
               className="peer block w-full appearance-none border-0 border-b-2 border-gray-100 bg-transparent py-2.5 px-0 text-sm text-white focus:border-blue-600 focus:outline-none focus:ring-0"
               placeholder=""
+              required
             />
             <label className="absolute text-sm text-white duration-200 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] left-0 peer-placeholder-shown:translate-y-2.5 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:text-blue-500">
               Your Password
@@ -38,14 +84,21 @@ const Register = () => {
           <div className="relative my-10">
             <input
               type="password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
               className="peer block w-full appearance-none border-0 border-b-2 border-gray-100 bg-transparent py-2.5 px-0 text-sm text-white focus:border-blue-600 focus:outline-none focus:ring-0"
               placeholder=""
+              required
             />
             <label className="absolute text-sm text-white duration-200 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] left-0 peer-placeholder-shown:translate-y-2.5 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:text-blue-500">
               Confirm Password
             </label>
             <AiOutlineUnlock className="absolute top-4 right-4" />
           </div>
+
+          {error && (
+            <div className="text-red-500 text-sm mb-4 text-center">{error}</div>
+          )}
 
           <button
             type="submit"
@@ -60,7 +113,7 @@ const Register = () => {
 
           <div className="mt-4 text-sm text-center">
             <span className="text-white mr-1">Already Created An Account?</span>
-            <Link className="text-blue-500 font-medium" to="/Login">
+            <Link className="text-blue-500 font-medium" to="/login">
               Login
             </Link>
           </div>

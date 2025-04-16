@@ -1,23 +1,66 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BiUser } from 'react-icons/bi';
 import { AiOutlineUnlock } from 'react-icons/ai';
+import { useState } from 'react';
+
 function Login() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/login`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to login');
+        return;
+      }
+
+      // const data = await response.json();
+
+      // Save token or user data to localStorage/sessionStorage
+      // localStorage.setItem('token', data.token);
+
+      // Navigate to the home page or dashboard
+      navigate('/');
+    } catch (err) {
+      console.error('Error during login:', err);
+      setError('An unexpected error occurred');
+    }
+  };
+
   return (
     <div className="min-h-screen w-full flex justify-center items-center px-4">
       <div className="bg-slate-800/30 border border-slate-400 rounded-md p-6 sm:p-8 shadow-lg backdrop-filter backdrop-blur-sm relative w-full max-w-md">
         <h1 className="text-4xl text-white font-extrabold text-center mb-6">
           Login
         </h1>
-        <form>
+        <form onSubmit={handleLogin}>
           <div className="relative my-10">
             <input
-              type="email"
+              type="type"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
               className="peer block w-full appearance-none border-0 border-b-2 border-gray-100 bg-transparent py-2.5 px-0 text-sm text-white focus:border-blue-600 focus:outline-none focus:ring-0"
               placeholder=""
+              required
             />
-            <label className="absolute text-sm  text-white text-gray-400duration-200 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] left-0 peer-placeholder-shown:translate-y-2.5 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:text-blue-500">
-              Your Email
+            <label className="absolute text-sm text-white duration-200 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] left-0 peer-placeholder-shown:translate-y-2.5 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:text-blue-500">
+              Your Username
             </label>
             <BiUser className="absolute top-4 right-4" />
           </div>
@@ -25,8 +68,11 @@ function Login() {
           <div className="relative my-10">
             <input
               type="password"
-              className="peer block w-full appearance-none  border-0 border-b-2 border-gray-100 bg-transparent py-2.5 px-0 text-sm text-white focus:border-blue-600 focus:outline-none focus:ring-0"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="peer block w-full appearance-none border-0 border-b-2 border-gray-100 bg-transparent py-2.5 px-0 text-sm text-white focus:border-blue-600 focus:outline-none focus:ring-0"
               placeholder=""
+              required
             />
             <label className="absolute text-sm text-white duration-200 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] left-0 peer-placeholder-shown:translate-y-2.5 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:text-blue-500">
               Your Password
@@ -34,15 +80,9 @@ function Login() {
             <AiOutlineUnlock className="absolute top-4 right-4" />
           </div>
 
-          <div className="flex justify-between items-center text-sm text-white mb-6">
-            <div className="flex gap-2 items-center">
-              <input type="checkbox" id="remember" />
-              <label htmlFor="remember">Remember Me</label>
-            </div>
-            <Link to="#" className="text-blue-500">
-              Forgot Password?
-            </Link>
-          </div>
+          {error && (
+            <div className="text-red-500 text-sm mb-4 text-center">{error}</div>
+          )}
 
           <button
             type="submit"
@@ -57,7 +97,7 @@ function Login() {
 
           <div className="mt-4 text-sm text-center">
             <span className="text-white mr-1">New Here?</span>
-            <Link className="text-blue-500 font-medium" to="/Register">
+            <Link className="text-blue-500 font-medium" to="/register">
               Create An Account
             </Link>
           </div>
@@ -66,4 +106,5 @@ function Login() {
     </div>
   );
 }
+
 export default Login;
