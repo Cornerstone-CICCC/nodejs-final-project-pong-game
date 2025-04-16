@@ -4,6 +4,7 @@ dotenv.config();
 import cors from 'cors';
 import mongoose from 'mongoose';
 import cookieSession from 'cookie-session';
+import cookieParser from 'cookie-parser';
 import userRouter from './routes/user.route';
 import historyRouter from './routes/history.routes';
 import { createServer } from 'http';
@@ -18,6 +19,7 @@ const app = express();
 //Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser(process.env.COOKIE_PARSER_KEY));
 const SIGN_KEY = process.env.COOKIE_SIGN_KEY;
 const ENCRYPT_KEY = process.env.COOKIE_ENCRYPT_KEY;
 if (!SIGN_KEY || !ENCRYPT_KEY) {
@@ -27,15 +29,15 @@ app.use(
   cookieSession({
     name: 'Session',
     keys: [SIGN_KEY, ENCRYPT_KEY],
-    maxAge: 15 * 24 * 60 * 1000,
+    maxAge: 15 * 24 * 60 * 60 * 1000,
   })
 );
 
 //Routes
-app.use('/users', userRouter);
-app.use('/histories', historyRouter);
-app.use('/rooms', roomRouter);
-app.use('/userrooms', userRoomRouter);
+app.use('/api/users', userRouter);
+app.use('/api/histories', historyRouter);
+app.use('/api/rooms', roomRouter);
+app.use('/api/userrooms', userRoomRouter);
 
 //Fallback
 app.use((req: Request, res: Response) => {
