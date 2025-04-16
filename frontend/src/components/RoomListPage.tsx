@@ -5,13 +5,17 @@ import JoinConfirmModal from './JoinConfirmModal';
 import useWebSocket from '../lib/useWebSocket';
 import { useNavigate } from 'react-router-dom';
 
+type roomType = {
+  id: string;
+  room_name: string;
+  participants: number;
+};
+
 export default function RoomListPage() {
   const [showMakeRoomModal, setShowMakeRoomModal] = useState(false);
   const [showJoinConfirmModal, setShowJoinConfirmModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const [rooms, setRooms] = useState<
-    { id: string; name: string; participants: number }[]
-  >([]);
+  const [rooms, setRooms] = useState<roomType[]>([]);
   const { sendMessage } = useWebSocket('ws://localhost:8080');
   const navigate = useNavigate();
 
@@ -27,7 +31,8 @@ export default function RoomListPage() {
           throw new Error('Failed to fetch rooms');
         }
         const data = await response.json();
-        setRooms(data.rooms); // Assuming the API returns { rooms: [...] }
+        console.log('Fetched rooms:', data);
+        setRooms(data); // Assuming the API returns { rooms: [...] }
       } catch (error) {
         console.error('Error fetching rooms:', error);
       }
@@ -59,17 +64,17 @@ export default function RoomListPage() {
     setShowJoinConfirmModal(false);
   };
 
-  const handleRoomCreated = (roomId: string, roomName: string) => {
+  const handleRoomCreated = (roomId: string, room_name: string) => {
     sendMessage({
       // this is dummy data, replace with actual data from cookies and server
       event: 'join_room',
-      room: roomName,
+      room: room_name,
       userId: '123',
     });
 
     setRooms(prevRooms => [
       ...prevRooms,
-      { id: roomId, name: roomName, participants: 1 },
+      { id: roomId, room_name: room_name, participants: 1 },
     ]);
 
     navigate(`/game/${roomId}`);
@@ -88,15 +93,19 @@ export default function RoomListPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {rooms.map(room => (
-          <div key={room.id} className="mb-4">
-            <JoinRoomCard
-              roomName={room.name}
-              participants={room.participants}
-              onJoin={() => handleOpenJoinConfirmModal(room.name)}
-            />
-          </div>
-        ))}
+        {rooms && rooms.length > 0 ? (
+          rooms.map(room => (
+            <div key={room.id} className="mb-4">
+              <JoinRoomCard
+                roomName={room.room_name}
+                participants={room.participants}
+                onJoin={() => handleOpenJoinConfirmModal(room.room_name)}
+              />
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500">No rooms available</p>
+        )}
       </div>
 
       {/* MakeRoomModal */}

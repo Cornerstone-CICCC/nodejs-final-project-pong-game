@@ -43,7 +43,9 @@ const deleteUserById = async (req: Request<{ id: string }>, res: Response) => {
 //Create new User
 const createUser = async (req: Request<{}, {}, IUser>, res: Response) => {
   try {
-    const { username, password, message } = req.body;
+    const { username, password } = req.body;
+
+    const message = '';
 
     const existUser = await User.exists({ username });
 
