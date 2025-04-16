@@ -21,6 +21,7 @@ function Login() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ username, password }),
+          credentials: 'include', // Include cookies in the request
         }
       );
 
@@ -36,7 +37,7 @@ function Login() {
       // localStorage.setItem('token', data.token);
 
       // Navigate to the home page or dashboard
-      navigate('/');
+      navigate('/roomlist');
     } catch (err) {
       console.error('Error during login:', err);
       setError('An unexpected error occurred');

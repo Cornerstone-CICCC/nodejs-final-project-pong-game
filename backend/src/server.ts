@@ -17,7 +17,12 @@ import userRoomRouter from './routes/user_room.routes';
 const app = express();
 
 //Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // Astro port
+    credentials: true, // allow cookies
+  })
+);
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_PARSER_KEY));
 const SIGN_KEY = process.env.COOKIE_SIGN_KEY;
@@ -48,7 +53,7 @@ app.use((req: Request, res: Response) => {
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http:localhost:5173',
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST'],
   },
 });

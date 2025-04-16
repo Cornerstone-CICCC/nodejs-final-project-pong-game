@@ -12,7 +12,7 @@ export interface IUser extends Document {
 const userSchema: Schema = new Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
-  message: { type: String, required: true },
+  message: { type: String, required: false },
   win: { type: Number, required: false },
   lose: { type: Number, required: false },
   scores: { type: Number, required: false },
