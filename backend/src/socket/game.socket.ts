@@ -203,6 +203,11 @@ io.on('connection', (socket: Socket) => {
 
         if (roomId) {
             socket.leave(roomId);
+
+            if (rooms[roomId].players[socket.id].side === 'left') {
+                socket.to(roomId).emit('room-owner-leave')
+            }
+
             delete rooms[roomId].players[socket.id];
 
             Object.values(rooms[roomId].players).map(player => {
@@ -221,6 +226,8 @@ io.on('connection', (socket: Socket) => {
             }
 
             delete playerRoomMap[socket.id];
+
+            socket.emit('refresh')
         }
     });
 });

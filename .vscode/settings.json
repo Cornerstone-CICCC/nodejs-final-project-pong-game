@@ -1,0 +1,15 @@
+{
+    // 自動使用 Prettier
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    // 儲存時自動格式化
+    "editor.formatOnSave": true,
+    // 有時候必須顯式告訴 Prettier 找 .prettierrc
+    "prettier.configPath": ".prettierrc"
+  }
+  

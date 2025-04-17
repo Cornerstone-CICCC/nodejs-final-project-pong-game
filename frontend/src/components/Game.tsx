@@ -37,6 +37,11 @@ interface RenderConst {
     rocketLength: number;
 }
 
+type CurrentUserType = {
+    userId: string;
+    username: string;
+};
+
 const socket: Socket = io('http://localhost:3500');
 
 function Game() {
@@ -55,10 +60,31 @@ function Game() {
     const [rightSideScore, setRightSideScore] = useState(0);
     const [myPlayer, setMyPlayer] = useState<Player|undefined>();
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
+    const [currentUser, setCurrentUser] = useState<CurrentUserType | null>(null);
     
     useEffect(() => {
         socket.emit('check-room-is-full', roomId)
     }, [])
+
+    useEffect(() => {
+        const fetchCurrentuserInfo = async () => {
+          console.log('Fetching current user info...');
+          const response = await fetch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/users/check-session`,
+            {
+              method: 'GET',
+              credentials: 'include',
+            }
+          );
+          if (!response.ok) {
+            console.error('Error fetching current user info:');
+            navigate('/login');
+          }
+          const data = await response.json();
+          setCurrentUser(data);
+        };
+        fetchCurrentuserInfo();
+    }, []);
 
     useEffect(() => {
         const handleResize = () => {
@@ -128,6 +154,11 @@ function Game() {
             if (data.isFull) {
                 alert('room is full');
             } 
+        })
+
+        socket.on('room-owner-leave', () => {
+            alert('The room owner has left the room, you will be returned to the room list.');
+            backToRoomPage()
         })
 
         return () => {
@@ -202,8 +233,23 @@ function Game() {
         return isLeftSideReady && isRightSideReady && myPlayer?.side === 'left'
     }
 
-    const backToRoomPage = () => {
+    const backToRoomPage = async () => {
         socket.disconnect();
+        await fetch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/userrooms/leave`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    user_room_id: roomId, 
+                    user_id: currentUser?.userId 
+                }),
+                credentials: 'include', // Include cookies in the request
+            }
+        );
+
         navigate('/roomlist')
     }
 
@@ -259,7 +305,7 @@ function Game() {
                 </div>
             </div>
             <button 
-                className='px-4 py-1 bg-red-500 text-white rounded-md cursor-pointer hover:bg-red-600 disabled:hover:hover:bg-red-500 disabled:opacity-[80%] disabled:cursor-not-allowed'
+                className='px-4 py-1 bg-red-500 text-white rounded-md cursor-pointer hover:bg-red-600 disabled:hover:bg-red-500 disabled:opacity-[80%] disabled:cursor-not-allowed'
                 onClick={backToRoomPage}
                 disabled={isPlaying}
             >
