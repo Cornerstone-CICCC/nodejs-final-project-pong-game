@@ -36,6 +36,7 @@ const getRoomById = async (req: Request<{ id: string }>, res: Response) => {
 const createRoom = async (req: Request, res: Response) => {
   try {
     const { room_name, creator_user_id } = req.body;
+
     if (!room_name || !creator_user_id) {
       res
         .status(400)
