@@ -1,5 +1,16 @@
+import { Edit, Save, User, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Edit, Save, X, User } from 'lucide-react';
+import { format } from 'date-fns';
+
+type HistoryType = {
+  _id: string;
+  user_id: string;
+  opponent_user_id: string;
+  own_score: number;
+  opponent_score: number;
+  date: string;
+  opponent_username: string;
+};
 
 const UserProfile = ({
   user,
@@ -9,26 +20,52 @@ const UserProfile = ({
   user: {
     id: string;
     username: string;
-    bio: string;
+    message: string;
   };
   currentUserId: string;
-  onSaveProfile: (data: { username: string; bio: string }) => void;
+  onSaveProfile: (data: { username: string; message: string }) => void;
 }) => {
   const isOwnProfile = user.id === currentUserId;
 
   const [isEditing, setIsEditing] = useState(false);
+  const [histories, setHistories] = useState<HistoryType[]>([]);
 
   const [formData, setFormData] = useState({
     username: user.username || '',
-    bio: user.bio || '',
+    message: user.message || '',
   });
 
   useEffect(() => {
     setFormData({
       username: user.username || '',
-      bio: user.bio || '',
+      message: user.message || '',
     });
   }, [user]);
+
+  useEffect(() => {
+    // Fetch history data for the user
+    const fetchHistories = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/histories/${user.id}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch histories');
+        }
+        const data = await response.json();
+        console.log('Fetched histories:', data);
+        setHistories(data);
+      } catch (error) {
+        console.error('Error fetching histories:', error);
+      }
+    };
+
+    fetchHistories();
+  }, [user.id]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -48,7 +85,7 @@ const UserProfile = ({
   const handleCancel = () => {
     setFormData({
       username: user.username || '',
-      bio: user.bio || '',
+      message: user.message || '',
     });
     setIsEditing(false);
   };
@@ -119,8 +156,8 @@ const UserProfile = ({
                 Introduction
               </label>
               <textarea
-                name="bio"
-                value={formData.bio}
+                name="message"
+                value={formData.message}
                 onChange={handleChange}
                 rows={4}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -141,11 +178,61 @@ const UserProfile = ({
                 Introduction
               </h3>
               <p className="mt-1 whitespace-pre-line">
-                {user.bio || 'No introduction provided.'}
+                {user.message || 'No introduction provided.'}
               </p>
             </div>
           </div>
         )}
+
+        {/* History Table */}
+        <div className="mt-6">
+          <h3 className="text-sm font-medium text-gray-500 mb-2">History</h3>
+          <div className="overflow-x-auto">
+            <table className="table-auto w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 px-4 py-2">Date</th>
+                  <th className="border border-gray-300 px-4 py-2">Opponent</th>
+                  <th className="border border-gray-300 px-4 py-2">
+                    Your Score
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2">
+                    Opponent Score
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {histories.length > 0 ? (
+                  histories.map(history => (
+                    <tr key={history._id}>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {format(new Date(history.date), 'MMMM d, yyyy h:mm a')}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {history.opponent_username}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {history.own_score}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {history.opponent_score}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="border border-gray-300 px-4 py-2 text-center text-gray-500"
+                    >
+                      No history available
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

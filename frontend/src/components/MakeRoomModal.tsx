@@ -22,6 +22,7 @@ const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({ name: roomName, type: roomType }),
         }
       );
@@ -31,8 +32,6 @@ const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
       }
 
       const data = await response.json();
-
-      console.log('Room created:', data);
 
       onRoomCreated(data.id, data.name);
 

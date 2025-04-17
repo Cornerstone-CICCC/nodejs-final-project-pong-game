@@ -3,6 +3,7 @@ import { UserRoom, IUserRoom } from '../models/user_room.model';
 import { Room } from '../models/room.model';
 import { User } from '../models/user.model';
 import mongoose from 'mongoose';
+import { console } from 'inspector';
 
 // Get all user rooms
 const getAllUserRooms = async (req: Request, res: Response) => {
@@ -184,6 +185,31 @@ const getUserRoomsByUserId = async (
   }
 };
 
+const getCreatorUserIdByRoomId = async (
+  req: Request<{ id: string }>,
+  res: Response
+) => {
+  try {
+    const roomId = req.params.id;
+    console.log('roomId', roomId);
+    const creatorUserId = await UserRoom.findOne({ room_id: roomId }).populate(
+      'creator_user_id'
+    );
+
+    console.log('creatorUserId', creatorUserId);
+
+    if (!creatorUserId) {
+      res.status(405).json({ message: 'No creator user found for this room' });
+      return;
+    }
+    res.status(200).json({ creatorUserId: creatorUserId?.creator_user_id });
+    return;
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Unable to get creator user ID' });
+  }
+};
+
 export default {
   getAllUserRooms,
   createUserRoom,
@@ -191,4 +217,5 @@ export default {
   leaveRoom,
   getUserRoomById,
   getUserRoomsByUserId,
+  getCreatorUserIdByRoomId,
 };

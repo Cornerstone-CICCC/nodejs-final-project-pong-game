@@ -1,6 +1,7 @@
 import React from 'react';
 
 interface JoinRoomCardProps {
+  roomId: string;
   roomName: string;
   participants: number;
   onJoin: () => void;

@@ -26,6 +26,7 @@ const Register = () => {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({ username, password }),
         }
       );
@@ -36,11 +37,11 @@ const Register = () => {
         return;
       }
 
-      // Registration successful, navigate to login page
       navigate('/login');
     } catch (err) {
       console.error('Error during registration:', err);
       setError('An unexpected error occurred');
+      navigate('/register');
     }
   };
 
