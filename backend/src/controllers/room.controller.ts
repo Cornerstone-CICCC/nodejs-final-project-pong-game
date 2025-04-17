@@ -35,8 +35,7 @@ const getRoomById = async (req: Request<{ id: string }>, res: Response) => {
 // Create new room
 const createRoom = async (req: Request, res: Response) => {
   try {
-    const { name: room_name } = req.body;
-    const creator_user_id = req.signedCookies.user_id
+    const { room_name, creator_user_id } = req.body;
 
     if (!room_name || !creator_user_id) {
       res
@@ -50,7 +49,7 @@ const createRoom = async (req: Request, res: Response) => {
       try {
         await UserRoom.create({
           room_id: room._id,
-          creator_user_id: creator_user_id,
+          creator_user_id,
           opponent_user_id: null,
         });
       } catch (userRoomError) {
