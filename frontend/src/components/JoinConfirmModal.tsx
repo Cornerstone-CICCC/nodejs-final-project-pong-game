@@ -1,17 +1,16 @@
 import React from 'react';
 import UserProfile from './Profile';
 import useWebSocket from '../lib/useWebSocket';
-import { useNavigate } from 'react-router-dom';
 
 interface JoinConfirmModalProps {
   user: {
     id: string;
     username: string;
-    bio: string;
+    message: string;
   };
   currentUserId: string;
   roomName: string;
-  onSaveProfile: (data: { username: string; bio: string }) => void;
+  onSaveProfile: (data: { username: string; message: string }) => void;
   onClose: () => void;
   onJoin: () => void;
 }
@@ -25,7 +24,6 @@ const JoinConfirmModal: React.FC<JoinConfirmModalProps> = ({
   onJoin,
 }) => {
   const { sendMessage } = useWebSocket('ws://localhost:8080');
-  const navigate = useNavigate();
 
   const handleJoinRoom = () => {
     // Send a WebSocket message to join the room
@@ -38,11 +36,11 @@ const JoinConfirmModal: React.FC<JoinConfirmModalProps> = ({
     // Call the parent onJoin handler
     onJoin();
 
-    navigate(`/game/${roomId}`);
+    // navigate(`/game/${roomId}`);
   };
   return (
     <div className="fixed inset-0 bg-gray-500/50 bg-opacity-80 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl mx-4">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl mx-4">
         <div className="flex">
           <div className="w-2/3 p-6 border-r">
             <UserProfile

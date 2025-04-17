@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { History, IHistory } from '../models/history.model';
 import { error } from 'console';
+import { User } from '../models/user.model';
 
 // Get all historys
 const getAllHistorys = async (req: Request, res: Response) => {
@@ -14,18 +15,32 @@ const getAllHistorys = async (req: Request, res: Response) => {
 };
 
 // Get history by id
-const getHistoryById = async (req: Request, res: Response) => {
+const getHistoryByUserId = async (req: Request, res: Response) => {
   try {
     const histories = await History.find({
       $or: [{ user_id: req.params.id }, { opponent_user_id: req.params.id }],
-    }).sort({ date: 1 }); // 1 for ascending order
+    })
+      .sort({ date: 1 })
+      .lean();
 
     if (!histories || histories.length === 0) {
       res.status(404).json({ message: 'No history found for this user' });
       return;
     }
 
-    res.status(200).json(histories);
+    const historiesWithUsernames = await Promise.all(
+      histories.map(async history => {
+        const opponentUser = await User.findById(
+          history.opponent_user_id
+        ).select('username');
+        return {
+          ...history,
+          opponent_username: opponentUser ? opponentUser.username : 'Unknown',
+        };
+      })
+    );
+
+    res.status(200).json(historiesWithUsernames);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Unable to get history' });
@@ -84,7 +99,7 @@ const deleteHistoryById = async (
 
 export default {
   createHistory,
-  getHistoryById,
+  getHistoryByUserId,
   getAllHistorys,
   updateHistoryById,
   deleteHistoryById,

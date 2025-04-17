@@ -184,15 +184,23 @@ const updateUserStatusById = async (
   }
 };
 
-const checkCookie = (req: Request, res: Response) => {
-  if (req.session && req.session.isLoggedIn) {
-    res.status(200).json({
-      message: req.session.isLoggedIn,
-    });
+const checkCookieSession = (req: Request, res: Response) => {
+  if (!req.session || !req.session.isLoggedIn) {
+    res.status(401).json({ message: 'No valid session. Please log in.' });
     return;
   }
-  res.status(500).json({
-    content: 'No cookies, have to login!',
+
+  const userId = req.signedCookies.user_id;
+  const username = req.signedCookies.username;
+
+  if (!userId || !username) {
+    res.status(401).json({ message: 'Unauthorized' });
+    return;
+  }
+
+  res.status(200).json({
+    userId: userId,
+    username: username,
   });
 };
 
@@ -205,5 +213,5 @@ export default {
   deleteUserById,
   loginUser,
   logoutUser,
-  checkCookie,
+  checkCookieSession,
 };

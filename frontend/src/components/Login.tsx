@@ -30,17 +30,11 @@ function Login() {
         setError(errorData.message || 'Failed to login');
         return;
       }
-
-      // const data = await response.json();
-
-      // Save token or user data to localStorage/sessionStorage
-      // localStorage.setItem('token', data.token);
-
-      // Navigate to the home page or dashboard
       navigate('/roomlist');
     } catch (err) {
       console.error('Error during login:', err);
       setError('An unexpected error occurred');
+      navigate('/login');
     }
   };
 

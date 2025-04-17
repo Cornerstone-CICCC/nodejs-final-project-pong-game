@@ -9,5 +9,6 @@ userRoomRouter.post('/join', userRoomController.joinAsOpponent);
 userRoomRouter.post('/leave', userRoomController.leaveRoom);
 userRoomRouter.get('/:id', userRoomController.getUserRoomById);
 userRoomRouter.get('/user/:id', userRoomController.getUserRoomsByUserId);
+userRoomRouter.get('/room/:id', userRoomController.getCreatorUserIdByRoomId);
 
 export default userRoomRouter;
