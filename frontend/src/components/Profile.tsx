@@ -108,6 +108,8 @@ const UserProfile = ({
   };
 
   const handleSave = () => {
+    user.username = formData.username;
+    user.message = formData.message;
     onSaveProfile(formData);
     setIsEditing(false);
   };
