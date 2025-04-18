@@ -1,20 +1,43 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface MakeRoomModalProps {
   onClose: () => void;
-  onRoomCreated: (roomId: string, roomName: string) => void;
+  // onRoomCreated: (roomId: string) => void;
+  createUserId: string;
 }
+
+type Room = {
+  _id: string;
+  room_name: string;
+  __v: number;
+};
+
+type UserRoom = {
+  _id: string;
+  room_id: string;
+  creator_user_id: string;
+  opponent_user_id: string | null;
+  __v: number;
+};
+
+type CreateRoomResponse = {
+  room: Room;
+  userRoom: UserRoom;
+};
 
 const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
   onClose,
-  onRoomCreated,
+  // onRoomCreated,
+  createUserId,
 }) => {
   const [roomName, setRoomName] = useState('');
   const [roomType, setRoomType] = useState('public');
-
+  const navigate = useNavigate();
   const handleCreateRoom = async () => {
     try {
+      //create recode of room and user_room automatically / args: room_name, creator_user_id
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/rooms`,
         {
@@ -23,7 +46,10 @@ const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
             'Content-Type': 'application/json',
           },
           credentials: 'include',
-          body: JSON.stringify({ name: roomName, type: roomType }),
+          body: JSON.stringify({
+            room_name: roomName,
+            creator_user_id: createUserId,
+          }),
         }
       );
 
@@ -31,9 +57,12 @@ const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
         throw new Error('Failed to create room');
       }
 
-      const data = await response.json();
+      const data: CreateRoomResponse = await response.json();
 
-      onRoomCreated(data.id, data.name);
+      // should use user_room id
+      // return object is room Object not user_room
+      console.log('/api/rooms fetch date:', data);
+      navigate(`/room/${data.userRoom._id}`);
 
       onClose();
       setRoomName('');

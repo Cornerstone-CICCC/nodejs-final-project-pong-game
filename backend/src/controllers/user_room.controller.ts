@@ -185,28 +185,53 @@ const getUserRoomsByUserId = async (
   }
 };
 
-const getCreatorUserIdByRoomId = async (
+const getUserRoomInfoWithCreatorInfoByRoomId = async (
   req: Request<{ id: string }>,
   res: Response
 ) => {
   try {
     const roomId = req.params.id;
     console.log('roomId', roomId);
-    const creatorUserId = await UserRoom.findOne({ room_id: roomId }).populate(
-      'creator_user_id'
-    );
+    const userRoomInfoWithCreatorInfo = await UserRoom.findOne({
+      room_id: roomId,
+    }).populate('creator_user_id');
 
-    console.log('creatorUserId', creatorUserId);
+    console.log('creatorUserId', userRoomInfoWithCreatorInfo);
 
-    if (!creatorUserId) {
+    if (!userRoomInfoWithCreatorInfo) {
       res.status(405).json({ message: 'No creator user found for this room' });
       return;
     }
-    res.status(200).json({ creatorUserId: creatorUserId?.creator_user_id });
+    res.status(200).json(userRoomInfoWithCreatorInfo);
     return;
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Unable to get creator user ID' });
+  }
+};
+
+const updateUserRoomByRoomId = async (
+  req: Request<{ id: string }>,
+  res: Response
+) => {
+  try {
+    const room_id = req.params.id;
+    const { opponent_user_id } = req.body;
+    const updatedUserRoom = await UserRoom.findOneAndUpdate(
+      { room_id },
+      { opponent_user_id },
+      { new: true }
+    );
+
+    if (!updatedUserRoom) {
+      res.status(404).json({ message: 'Room not found' });
+      return;
+    }
+
+    res.status(200).json(updatedUserRoom);
+  } catch (error) {
+    console.error('Error updating opponent_user_id:', error);
+    res.status(500).json({ message: 'Failed to update opponent_user_id' });
   }
 };
 
@@ -217,5 +242,6 @@ export default {
   leaveRoom,
   getUserRoomById,
   getUserRoomsByUserId,
-  getCreatorUserIdByRoomId,
+  getUserRoomInfoWithCreatorInfoByRoomId,
+  updateUserRoomByRoomId,
 };

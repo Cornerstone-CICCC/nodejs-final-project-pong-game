@@ -2,76 +2,55 @@ import { useEffect, useState } from 'react';
 import JoinRoomCard from './JoinRoomCard';
 import MakeRoomModal from './MakeRoomModal';
 import JoinConfirmModal from './JoinConfirmModal';
-import useWebSocket from '../lib/useWebSocket';
 import { useNavigate } from 'react-router-dom';
-
-type roomType = {
-  _id: string;
-  room_name: string;
-  participants: number;
-};
-
-type UserType = {
-  _id: string;
-  username: string;
-  message: string;
-  score: number;
-  win: number;
-  lose: number;
-  password: string;
-};
-
-type CurrentUserType = {
-  user_id: string;
-  username: string;
-};
+import { currentUserType, roomCardType, userRoomType } from '../lib/type';
+import { io } from 'socket.io-client';
 
 export default function RoomListPage() {
   const [showMakeRoomModal, setShowMakeRoomModal] = useState(false);
   const [showJoinConfirmModal, setShowJoinConfirmModal] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const [rooms, setRooms] = useState<roomType[]>([]);
-  const [creatorUser, setCreatorUser] = useState<UserType | null>(null);
-  const [currentUser, setCurrentUser] = useState<CurrentUserType | null>(null);
-  const { sendMessage } = useWebSocket('ws://localhost:8080');
+  const [rooms, setRooms] = useState<roomCardType[]>([]);
+  const [currentUser, setCurrentUser] = useState<currentUserType | null>(null);
+  const [selectedRoomId, setSelectedRoomId] = useState<string>('');
   const navigate = useNavigate();
+  const socket = io(import.meta.env.VITE_BACKEND_URL);
+
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/userrooms/`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
+      if (!response.ok) {
+        console.error('Error fetching rooms:');
+        throw new Error('Failed to fetch rooms');
+      }
+      const data: userRoomType[] = await response.json();
+      console.log('Fetched rooms:', data);
+
+      const rooms: roomCardType[] = [];
+
+      data.map((userRoom: userRoomType) => {
+        const room = {
+          _id: userRoom.room_id._id,
+          room_name: userRoom.room_id.room_name,
+          participants: 1,
+        };
+
+        rooms.push(room);
+      });
+
+      // setUserRooms(data);
+      setRooms(rooms);
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+    }
+  };
 
   useEffect(() => {
-    // API call to fetch rooms and participants
-    const fetchRooms = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/userrooms/`,
-          {
-            method: 'GET',
-            credentials: 'include',
-          }
-        );
-        if (!response.ok) {
-          console.error('Error fetching rooms:');
-          throw new Error('Failed to fetch rooms');
-        }
-        const data = await response.json();
-        console.log('Fetched rooms:', data);
-
-        const rooms: any = [];
-
-        data.map((userRoom: any) => {
-          const room = {
-            _id: userRoom.room_id._id,
-            room_name: userRoom.room_id.room_name,
-            participants: 1,
-          }
-
-          rooms.push(room)
-        })
-
-        setRooms(rooms);
-      } catch (error) {
-        console.error('Error fetching rooms:', error);
-      }
-    };
-
     fetchRooms();
   }, []);
 
@@ -95,78 +74,18 @@ export default function RoomListPage() {
     fetchCurrentuserInfo();
   }, []);
 
-  const handleOpenMakeRoomModal = () => {
-    setShowMakeRoomModal(true);
-  };
-
-  const handleCloseMakeRoomModal = () => {
-    setShowMakeRoomModal(false);
-  };
-
-  const handleOpenJoinConfirmModal = (room: roomType) => {
-    console.log('Joining room:', room);
-
-    const fetchCreatorInfo = async () => {
-      try {
-        console.log('Fetching creator info for room ID:', room._id);
-
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/userrooms/room/${room._id}`,
-          {
-            method: 'GET',
-            credentials: 'include',
-          }
-        );
-
-        if (!response.ok) {
-          console.error('Error fetching room creator info:');
-          throw new Error('Failed to fetch room creator info');
-        }
-
-        const data = await response.json();
-
-        if (!data.creatorUserId) {
-          console.error('Creator user ID not found in response:', data);
-          throw new Error('Creator user ID not found in response');
-        }
-
-        setCreatorUser(data.creatorUserId);
-        console.log('Fetched room creator info:', data.creatorUserId._id);
-      } catch (error) {
-        console.error('Error fetching room creator info:', error);
-      }
+  useEffect(() => {
+    const handleRefresh = () => {
+      console.log('Refresh event received');
+      fetchRooms();
     };
 
-    fetchCreatorInfo();
-    setSelectedRoom(room.room_name);
-    setShowJoinConfirmModal(true);
-  };
+    socket.on('refresh', handleRefresh);
 
-  const handleCloseJoinConfirmModal = () => {
-    setShowJoinConfirmModal(false);
-    setSelectedRoom(null);
-  };
-
-  const handleJoinRoom = () => {
-    console.log(`Joining room: ${selectedRoom}`);
-    setShowJoinConfirmModal(false);
-  };
-
-  const handleRoomCreated = (roomId: string, room_name: string) => {
-    sendMessage({
-      // this is dummy data, replace with actual data from cookies and server
-      event: 'join room',
-      room: room_name,
-      userId: '123',
-    });
-
-    setRooms(prevRooms => [
-      ...prevRooms,
-      { _id: roomId, room_name: room_name, participants: 1 },
-    ]);
-
-    navigate(`/game/${roomId}`);
-  };
+    return () => {
+      socket.off('refresh', handleRefresh);
+    };
+  }, [socket]);
 
   const logout = async () => {
     try {
@@ -193,7 +112,7 @@ export default function RoomListPage() {
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-2xl font-bold">Created Rooms</h1>
         <button
-          onClick={handleOpenMakeRoomModal}
+          onClick={() => setShowMakeRoomModal(true)}
           className="border border-black px-4 py-2 rounded hover:bg-gray-100"
         >
           Make a new room
@@ -214,7 +133,10 @@ export default function RoomListPage() {
                 roomId={room._id}
                 roomName={room.room_name}
                 participants={room.participants}
-                onJoin={() => handleOpenJoinConfirmModal(room)}
+                onJoin={() => {
+                  setShowJoinConfirmModal(true);
+                  setSelectedRoomId(room._id);
+                }}
               />
             </div>
           ))
@@ -226,26 +148,21 @@ export default function RoomListPage() {
       {/* MakeRoomModal */}
       {showMakeRoomModal && (
         <MakeRoomModal
-          onRoomCreated={handleRoomCreated}
-          onClose={handleCloseMakeRoomModal}
+          onClose={() => setShowMakeRoomModal(false)}
+          createUserId={currentUser?.userId || '000'}
         />
       )}
 
       {/* JoinConfirmModal */}
-      {showJoinConfirmModal && selectedRoom && (
+      {showJoinConfirmModal && (
         <JoinConfirmModal
-          // get user data from mongoDB
-          user={{
-            id: creatorUser?._id || '000',
-            username: creatorUser?.username || 'creatorUser',
-            message: creatorUser?.message || 'This is a message',
+          selectedRoomId={selectedRoomId}
+          currentUserId={currentUser?.userId || '999'}
+          onClose={() => setShowJoinConfirmModal(false)}
+          // onJoin={() => setShowJoinConfirmModal(false)}
+          onSaveProfile={() => {
+            console.log('Profile saved');
           }}
-          // this date get from cookies
-          currentUserId={currentUser?.user_id || '999'}
-          roomName={selectedRoom}
-          onSaveProfile={data => console.log('Profile saved:', data)}
-          onClose={handleCloseJoinConfirmModal}
-          onJoin={handleJoinRoom}
         />
       )}
     </div>

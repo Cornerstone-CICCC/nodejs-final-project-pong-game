@@ -1,31 +1,35 @@
-import { useRef, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
 
-const useWebSocket = (url: string) => {
-  const socketRef = useRef<WebSocket | null>(null);
+const useWebSocket = () => {
+  const url = import.meta.env.VITE_BACKEND_URL;
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    socketRef.current = new WebSocket(url);
+    const socketInstance = io(url);
+    setSocket(socketInstance);
 
-    socketRef.current.onopen = () => {
+    socketInstance.on('connect', () => {
       console.log('WebSocket connected');
-    };
+    });
 
-    socketRef.current.onclose = () => {
+    socketInstance.on('disconnect', () => {
       console.log('WebSocket disconnected');
-    };
+    });
 
     return () => {
-      socketRef.current?.close();
+      socketInstance.disconnect();
     };
   }, [url]);
 
-  const sendMessage = (message: object) => {
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify(message));
+  // reason of using any type is because the message can be any type on server side
+  const sendMessage = (event: string, message: any) => {
+    if (socket) {
+      socket.emit(event, message);
     }
   };
 
-  return { sendMessage };
+  return { sendMessage, socket };
 };
 
 export default useWebSocket;
