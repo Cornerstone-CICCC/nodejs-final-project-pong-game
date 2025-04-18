@@ -3,8 +3,15 @@ import JoinRoomCard from './JoinRoomCard';
 import MakeRoomModal from './MakeRoomModal';
 import JoinConfirmModal from './JoinConfirmModal';
 import { useNavigate } from 'react-router-dom';
-import { currentUserType, roomCardType, userRoomType } from '../lib/type';
+import {
+  currentUserType,
+  roomCardType,
+  userRoomType,
+  userType,
+} from '../lib/type';
 import { io } from 'socket.io-client';
+import UserProfile from './Profile';
+import { CircleUserRound } from 'lucide-react';
 
 export default function RoomListPage() {
   const [showMakeRoomModal, setShowMakeRoomModal] = useState(false);
@@ -12,6 +19,8 @@ export default function RoomListPage() {
   const [rooms, setRooms] = useState<roomCardType[]>([]);
   const [currentUser, setCurrentUser] = useState<currentUserType | null>(null);
   const [selectedRoomId, setSelectedRoomId] = useState<string>('');
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [loginUser, setLoginUser] = useState<userType | null>(null);
   const navigate = useNavigate();
   const socket = io(import.meta.env.VITE_BACKEND_URL);
 
@@ -43,7 +52,6 @@ export default function RoomListPage() {
         rooms.push(room);
       });
 
-      // setUserRooms(data);
       setRooms(rooms);
     } catch (error) {
       console.error('Error fetching rooms:', error);
@@ -75,6 +83,35 @@ export default function RoomListPage() {
   }, []);
 
   useEffect(() => {
+    const fetchLoginUserInfo = async () => {
+      if (!currentUser?.userId) {
+        console.log('currentUser is not set yet. Skipping fetchLoginUserInfo.');
+        return;
+      }
+
+      console.log('Fetching login user info...');
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/${currentUser.userId}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        console.error('Error fetching login user info:');
+        navigate('/login');
+        return;
+      }
+
+      const data = await response.json();
+      setLoginUser(data);
+    };
+
+    fetchLoginUserInfo();
+  }, [currentUser?.userId]);
+
+  useEffect(() => {
     const handleRefresh = () => {
       console.log('Refresh event received');
       fetchRooms();
@@ -86,6 +123,41 @@ export default function RoomListPage() {
       socket.off('refresh', handleRefresh);
     };
   }, [socket]);
+
+  const handleSaveProfile = async (data: {
+    username: string;
+    message: string;
+  }) => {
+    try {
+      if (!currentUser?.userId) {
+        console.error('User ID is not available');
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/${currentUser.userId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      const updatedUser = await response.json();
+      console.log('Profile updated successfully:', updatedUser);
+
+      setLoginUser(updatedUser);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
 
   const logout = async () => {
     try {
@@ -117,12 +189,17 @@ export default function RoomListPage() {
         >
           Make a new room
         </button>
-        <button
-          onClick={logout}
-          className="border border-black px-4 py-2 rounded hover:bg-gray-100"
-        >
-          Logout
-        </button>
+        <div className="flex items-center gap-4">
+          <button onClick={() => setShowProfileModal(true)}>
+            <CircleUserRound size={32} />
+          </button>
+          <button
+            onClick={logout}
+            className="border border-black px-4 py-2 rounded hover:bg-gray-100"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -159,11 +236,26 @@ export default function RoomListPage() {
           selectedRoomId={selectedRoomId}
           currentUserId={currentUser?.userId || '999'}
           onClose={() => setShowJoinConfirmModal(false)}
-          // onJoin={() => setShowJoinConfirmModal(false)}
-          onSaveProfile={() => {
-            console.log('Profile saved');
-          }}
+          onSaveProfile={handleSaveProfile}
         />
+      )}
+
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-gray-700/30 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-3/4 max-w-7xl">
+            <UserProfile
+              user={loginUser!}
+              currentUserId={currentUser?.userId || ''}
+              onSaveProfile={handleSaveProfile}
+            />
+            <button
+              onClick={() => setShowProfileModal(false)}
+              className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
