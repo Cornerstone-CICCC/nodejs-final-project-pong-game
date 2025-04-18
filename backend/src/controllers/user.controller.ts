@@ -134,30 +134,25 @@ const updateUserById = async (
   try {
     const { username, password, message } = req.body;
 
+    const updateUser: Partial<IUser> = { username, message };
+
     if (password) {
-      const hashedPassword = await bcrypt.hash(password, 12);
-      const updateUser = {
-        username: username,
-        password: hashedPassword,
-        message: message,
-      };
-      const user = await User.findByIdAndUpdate(req.params.id, updateUser, {
-        new: true,
-      });
-      res.status(200).json(user);
+      updateUser.password = await bcrypt.hash(password, 12);
     }
-    // const hashedPassword = await bcrypt.hash(password, 12)
-    const updateUser = {
-      username: username,
-      message: message,
-    };
+
     const user = await User.findByIdAndUpdate(req.params.id, updateUser, {
       new: true,
     });
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found!' });
+      return;
+    }
+
     res.status(200).json(user);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Unable to  update user' });
+    res.status(500).json({ message: 'Unable to update user' });
   }
 };
 

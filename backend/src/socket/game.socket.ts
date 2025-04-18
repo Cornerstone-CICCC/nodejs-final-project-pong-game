@@ -208,6 +208,7 @@ const gameSocket = (io: Server) => {
         };
 
         socket.join(roomId);
+        io.emit('refresh');
 
         const side: Side =
           Object.keys(rooms[roomId].players).length === 0 ? 'left' : 'right';
