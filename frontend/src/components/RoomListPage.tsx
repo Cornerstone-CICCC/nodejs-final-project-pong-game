@@ -41,7 +41,7 @@ export default function RoomListPage() {
     const fetchRooms = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/rooms`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/userrooms/`,
           {
             method: 'GET',
             credentials: 'include',
@@ -53,7 +53,20 @@ export default function RoomListPage() {
         }
         const data = await response.json();
         console.log('Fetched rooms:', data);
-        setRooms(data);
+
+        const rooms: any = [];
+
+        data.map((userRoom: any) => {
+          const room = {
+            _id: userRoom.room_id._id,
+            room_name: userRoom.room_id.room_name,
+            participants: 1,
+          }
+
+          rooms.push(room)
+        })
+
+        setRooms(rooms);
       } catch (error) {
         console.error('Error fetching rooms:', error);
       }
