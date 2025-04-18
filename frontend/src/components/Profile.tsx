@@ -1,17 +1,7 @@
 import { Edit, Save, User, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { userType } from '../lib/type';
-
-type HistoryType = {
-  _id: string;
-  user_id: string;
-  opponent_user_id: string;
-  own_score: number;
-  opponent_score: number;
-  date: string;
-  opponent_username: string;
-};
+import { HistoryType, userType } from '../lib/type';
 
 const UserProfile = ({
   user,

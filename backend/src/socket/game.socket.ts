@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io';
+import { History } from '../models/history.model';
 
 interface Player {
   id: string;
@@ -8,6 +9,7 @@ interface Player {
   width: number;
   height: number;
   speed: number;
+  userId?: string;
 }
 
 interface Ball {
@@ -85,6 +87,35 @@ const gameSocket = (io: Server) => {
 
   function handleGameOver(roomId: string, scores: Scores) {
     const winner = scores.left > scores.right ? 'left' : 'right';
+
+    const players = rooms[roomId].players;
+    const leftPlayer = Object.values(players).find(
+      player => player.side === 'left'
+    );
+    const rightPlayer = Object.values(players).find(
+      player => player.side === 'right'
+    );
+
+    if (leftPlayer && rightPlayer) {
+      try {
+        History.create({
+          user_id: leftPlayer.userId,
+          opponent_user_id: rightPlayer.userId,
+          own_score: scores.left,
+          opponent_score: scores.right,
+          date: new Date(),
+        })
+          .then(history => {
+            console.log('Game history saved:', history);
+          })
+          .catch(err => {
+            console.error('Failed to save game history:', err);
+          });
+      } catch (err) {
+        console.error('Error saving game history:', err);
+      }
+    }
+
     io.to(roomId).emit('game-over', { winner });
     scores.left = 0;
     scores.right = 0;
@@ -156,32 +187,39 @@ const gameSocket = (io: Server) => {
       io.to(roomId).emit('render', gameScreenSize);
     });
 
-    socket.on('join-room', roomId => {
-      const roomBall: Ball = {
-        x: gameScreenSize.width / 2,
-        y: gameScreenSize.height / 2,
-        dx: 5,
-        dy: 5,
-      };
-      const roomScores: Scores = { left: 0, right: 0 };
-      const roomPlayers = rooms[roomId]?.players ?? {};
+    socket.on(
+      'join-room',
+      ({ roomId, userId }: { roomId: string; userId: string }) => {
+        const roomBall: Ball = {
+          x: gameScreenSize.width / 2,
+          y: gameScreenSize.height / 2,
+          dx: 5,
+          dy: 5,
+        };
 
-      playerRoomMap[socket.id] = roomId;
-      rooms[roomId] = {
-        players: roomPlayers,
-        ball: roomBall,
-        scores: roomScores,
-      };
+        const roomScores: Scores = { left: 0, right: 0 };
+        const roomPlayers = rooms[roomId]?.players ?? {};
 
-      socket.join(roomId);
+        playerRoomMap[socket.id] = roomId;
+        rooms[roomId] = {
+          players: roomPlayers,
+          ball: roomBall,
+          scores: roomScores,
+        };
 
-      const side: Side =
-        Object.keys(rooms[roomId].players).length === 0 ? 'left' : 'right';
-      rooms[roomId].players[socket.id] = createPlayer(socket.id, side);
+        socket.join(roomId);
 
-      // init gameState
-      io.to(roomId).emit('game-state', rooms[roomId]);
-    });
+        const side: Side =
+          Object.keys(rooms[roomId].players).length === 0 ? 'left' : 'right';
+        rooms[roomId].players[socket.id] = {
+          ...createPlayer(socket.id, side),
+          userId,
+        };
+
+        // init gameState
+        io.to(roomId).emit('game-state', rooms[roomId]);
+      }
+    );
 
     // Players drag to move the racket
     socket.on('move-to', (roomId: string, mouseY: number) => {
@@ -218,7 +256,7 @@ const gameSocket = (io: Server) => {
       io.to(roomId).emit('player-is-ready', data);
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       console.log(`player disconnect: ${socket.id}`);
 
       const roomId = playerRoomMap[socket.id];

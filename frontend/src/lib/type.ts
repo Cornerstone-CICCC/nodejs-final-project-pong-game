@@ -32,3 +32,13 @@ export type userRoomType = {
   creator_user_id: userType;
   opponent_user_id: userType | null;
 };
+
+export type HistoryType = {
+  _id: string;
+  user_id: string;
+  opponent_user_id: string;
+  own_score: number;
+  opponent_score: number;
+  date: string;
+  opponent_username: string;
+};
