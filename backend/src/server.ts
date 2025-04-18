@@ -7,12 +7,12 @@ import cookieParser from 'cookie-parser';
 import historyRouter from './routes/history.routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import roomsSocket from './socket/room.socket';
 import gameSocket from './socket/game.socket';
 import roomRouter from './routes/room.routes';
 import userRoomRouter from './routes/user_room.routes';
 import { protectedRouter, publicRouter } from './routes/user.route';
 import { requireAuth } from './middlewares/auth.middleware';
+import roomsSocket from './socket/room.socket';
 dotenv.config();
 
 //Create server

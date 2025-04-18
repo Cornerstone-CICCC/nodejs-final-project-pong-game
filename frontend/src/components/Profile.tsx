@@ -1,6 +1,7 @@
 import { Edit, Save, User, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { userType } from '../lib/type';
 
 type HistoryType = {
   _id: string;
@@ -17,15 +18,11 @@ const UserProfile = ({
   currentUserId,
   onSaveProfile,
 }: {
-  user: {
-    id: string;
-    username: string;
-    message: string;
-  };
+  user: userType;
   currentUserId: string;
   onSaveProfile: (data: { username: string; message: string }) => void;
 }) => {
-  const isOwnProfile = user.id === currentUserId;
+  const isOwnProfile = user._id === currentUserId;
 
   const [isEditing, setIsEditing] = useState(false);
   const [histories, setHistories] = useState<HistoryType[]>([]);
@@ -35,6 +32,27 @@ const UserProfile = ({
     message: user.message || '',
   });
 
+  const fetchUserInfo = async (user_id: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/${user_id}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+      const data = await response.json();
+      console.log('Fetched user info:', data);
+      return data; // ユーザー情報全体を返す
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      return { username: 'Unknown User' }; // エラー時のデフォルト値
+    }
+  };
+
   useEffect(() => {
     setFormData({
       username: user.username || '',
@@ -43,11 +61,10 @@ const UserProfile = ({
   }, [user]);
 
   useEffect(() => {
-    // Fetch history data for the user
     const fetchHistories = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/histories/${user.id}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/histories/${user._id}`,
           {
             method: 'GET',
             credentials: 'include',
@@ -56,16 +73,39 @@ const UserProfile = ({
         if (!response.ok) {
           throw new Error('Failed to fetch histories');
         }
-        const data = await response.json();
+        const data: HistoryType[] = await response.json();
         console.log('Fetched histories:', data);
-        setHistories(data);
+
+        const processedHistories = await Promise.all(
+          data.map(async (history: HistoryType) => {
+            if (history.opponent_user_id === user._id) {
+              const opponentUser = await fetchUserInfo(history.user_id);
+              return {
+                ...history,
+                opponent_username: opponentUser.username,
+                own_score: history.opponent_score,
+                opponent_score: history.own_score,
+              };
+            } else {
+              const opponentUser = await fetchUserInfo(
+                history.opponent_user_id
+              );
+              return {
+                ...history,
+                opponent_username: opponentUser.username,
+              };
+            }
+          })
+        );
+
+        setHistories(processedHistories);
       } catch (error) {
         console.error('Error fetching histories:', error);
       }
     };
 
     fetchHistories();
-  }, [user.id]);
+  }, [user._id]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -101,7 +141,7 @@ const UserProfile = ({
             <h2 className="text-2xl font-bold">
               {isEditing ? formData.username : user.username}
             </h2>
-            {!isEditing && <p className="text-gray-500">#{user.id}</p>}
+            {!isEditing && <p className="text-gray-500">#{user._id}</p>}
           </div>
         </div>
 

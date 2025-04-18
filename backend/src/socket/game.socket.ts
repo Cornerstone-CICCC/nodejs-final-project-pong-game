@@ -249,7 +249,7 @@ const gameSocket = (io: Server) => {
 
         delete playerRoomMap[socket.id];
 
-        socket.emit('refresh');
+        io.emit('refresh');
       }
     });
   });

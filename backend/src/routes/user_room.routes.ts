@@ -8,7 +8,11 @@ userRoomRouter.post('/', userRoomController.createUserRoom);
 userRoomRouter.post('/join', userRoomController.joinAsOpponent);
 userRoomRouter.post('/leave', userRoomController.leaveRoom);
 userRoomRouter.get('/:id', userRoomController.getUserRoomById);
+userRoomRouter.put('/:id', userRoomController.updateUserRoomByRoomId);
 userRoomRouter.get('/user/:id', userRoomController.getUserRoomsByUserId);
-userRoomRouter.get('/room/:id', userRoomController.getCreatorUserIdByRoomId);
+userRoomRouter.get(
+  '/room/:id',
+  userRoomController.getUserRoomInfoWithCreatorInfoByRoomId
+);
 
 export default userRoomRouter;

@@ -1,14 +1,12 @@
 import { Server, Socket } from 'socket.io';
 
 const roomsSocket = (io: Server) => {
- io.on('connection', (socket: Socket) => {
-
+  io.on('connection', (socket: Socket) => {
     // Create room emit
-    socket.on('create', (data) => {
+    socket.on('create', data => {
       const { room_name } = data;
       io.emit('create', { room_name }); //emit event create room
       socket.broadcast.emit('join room', { room_name }); //emit enter right after create
-
     });
 
     //join room
@@ -20,7 +18,6 @@ const roomsSocket = (io: Server) => {
     socket.on('leave room', (room: string) => {
       socket.broadcast.emit('leave room', { room }); //emit event leave room
     });
-
   });
 };
 

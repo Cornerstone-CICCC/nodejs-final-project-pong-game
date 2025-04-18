@@ -41,24 +41,28 @@ const createRoom = async (req: Request, res: Response) => {
       res
         .status(400)
         .json({ message: 'Room name and creator user ID are required' });
-    } else {
-      const room = await Room.create({
-        room_name,
-      });
-
-      try {
-        await UserRoom.create({
-          room_id: room._id,
-          creator_user_id,
-          opponent_user_id: null,
-        });
-      } catch (userRoomError) {
-        await Room.findByIdAndDelete(room._id);
-        throw userRoomError;
-      }
-
-      res.status(201).json(room);
     }
+
+    const room = await Room.create({
+      room_name,
+    });
+
+    let userRoom;
+    try {
+      userRoom = await UserRoom.create({
+        room_id: room._id,
+        creator_user_id,
+        opponent_user_id: null,
+      });
+    } catch (userRoomError) {
+      await Room.findByIdAndDelete(room._id);
+      throw userRoomError;
+    }
+
+    res.status(201).json({
+      room,
+      userRoom,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Unable to create room' });
