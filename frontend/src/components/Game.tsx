@@ -65,27 +65,29 @@ function Game() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<CurrentUserType | null>(null);
 
+  const fetchCurrentuserInfo = async () => {
+    console.log('Fetching current user info...');
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/check-session`,
+      {
+        method: 'GET',
+        credentials: 'include',
+      }
+    );
+    if (!response.ok) {
+      console.error('Error fetching current user info:');
+      navigate('/login');
+    }
+    const data = await response.json();
+    console.log('Current user info:', data);
+    setCurrentUser(data);
+  };
+
   useEffect(() => {
     socket.emit('check-room-is-full', roomId);
   }, []);
 
   useEffect(() => {
-    const fetchCurrentuserInfo = async () => {
-      console.log('Fetching current user info...');
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/check-session`,
-        {
-          method: 'GET',
-          credentials: 'include',
-        }
-      );
-      if (!response.ok) {
-        console.error('Error fetching current user info:');
-        navigate('/login');
-      }
-      const data = await response.json();
-      setCurrentUser(data);
-    };
     fetchCurrentuserInfo();
   }, []);
 
@@ -112,69 +114,71 @@ function Game() {
   }, [width, height, gameState]);
 
   useEffect(() => {
-    socket.emit('join-room', roomId);
+    if (currentUser) {
+      socket.emit('join-room', { roomId, userId: currentUser?.userId });
 
-    socket.on('game-state', (state: GameState) => {
-      setGameState(state);
-      draw(state);
-      setMyPlayer(
-        Object.values(state.players).find(player => player.id === socket.id)
-      );
-    });
+      socket.on('game-state', (state: GameState) => {
+        setGameState(state);
+        draw(state);
+        setMyPlayer(
+          Object.values(state.players).find(player => player.id === socket.id)
+        );
+      });
 
-    socket.on('player-is-ready', (data: { side: Side }) => {
-      data.side === 'left'
-        ? setIsLeftSideReady(true)
-        : setIsRightSideReady(true);
-    });
+      socket.on('player-is-ready', (data: { side: Side }) => {
+        data.side === 'left'
+          ? setIsLeftSideReady(true)
+          : setIsRightSideReady(true);
+      });
 
-    socket.on('current-score', (scores: Scores) => {
-      setLeftSideScore(scores.left);
-      setRightSideScore(scores.right);
-    });
+      socket.on('current-score', (scores: Scores) => {
+        setLeftSideScore(scores.left);
+        setRightSideScore(scores.right);
+      });
 
-    socket.on('game-is-start', () => {
-      setIsPlaying(true);
-    });
+      socket.on('game-is-start', () => {
+        setIsPlaying(true);
+      });
 
-    socket.on('game-over', data => {
-      socket.emit('game-reset', roomId, {});
-      alert(`winner is ${data.winner}!!`);
-      setIsLeftSideReady(false);
-      setIsRightSideReady(false);
-      setIsPlaying(false);
-    });
+      socket.on('game-over', data => {
+        socket.emit('game-reset', roomId, {});
+        alert(`winner is ${data.winner}!!`);
+        setIsLeftSideReady(false);
+        setIsRightSideReady(false);
+        setIsPlaying(false);
+      });
 
-    socket.on('player-leaving', () => {
-      setIsLeftSideReady(false);
-      setIsRightSideReady(false);
-    });
+      socket.on('player-leaving', () => {
+        setIsLeftSideReady(false);
+        setIsRightSideReady(false);
+      });
 
-    socket.on('render', (data: RenderConst) => {
-      setWidth(data.width);
-      setHeight(data.height);
-    });
+      socket.on('render', (data: RenderConst) => {
+        setWidth(data.width);
+        setHeight(data.height);
+      });
 
-    socket.on('check-room-result', data => {
-      if (data.isFull) {
-        alert('room is full');
-      }
-    });
+      socket.on('check-room-result', data => {
+        if (data.isFull) {
+          alert('room is full');
+        }
+      });
 
-    socket.on('room-owner-leave', () => {
-      alert(
-        'The room owner has left the room, you will be returned to the room list.'
-      );
-      backToRoomPage();
-    });
+      socket.on('room-owner-leave', () => {
+        alert(
+          'The room owner has left the room, you will be returned to the room list.'
+        );
+        backToRoomPage();
+      });
 
-    return () => {
-      socket.off('game-state');
-      socket.off('player-is-ready');
-      socket.off('current-score');
-      socket.off('game-over');
-    };
-  }, []);
+      return () => {
+        socket.off('game-state');
+        socket.off('player-is-ready');
+        socket.off('current-score');
+        socket.off('game-over');
+      };
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

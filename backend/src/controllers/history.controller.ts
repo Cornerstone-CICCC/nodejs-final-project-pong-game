@@ -50,10 +50,8 @@ const getHistoryByUserId = async (req: Request, res: Response) => {
 // Create new history
 const createHistory = async (req: Request, res: Response) => {
   try {
-    const { history_id, user_id, opponent_user_id, own_score, opponent_score } =
-      req.body;
+    const { user_id, opponent_user_id, own_score, opponent_score } = req.body;
     const history = await History.create({
-      history_id,
       user_id,
       opponent_user_id,
       own_score,
