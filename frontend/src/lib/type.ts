@@ -42,3 +42,41 @@ export type HistoryType = {
   date: string;
   opponent_username: string;
 };
+
+export type MakeRoomModalProps = {
+  onClose: () => void;
+  createUserId: string;
+};
+
+export type Room = {
+  _id: string;
+  room_name: string;
+  __v: number;
+};
+
+export type UserRoom = {
+  _id: string;
+  room_id: string;
+  creator_user_id: string;
+  opponent_user_id: string | null;
+  __v: number;
+};
+
+export type CreateRoomResponse = {
+  room: Room;
+  userRoom: UserRoom;
+};
+
+export type JoinConfirmModalProps = {
+  currentUserId: string;
+  selectedRoomId: string;
+  onSaveProfile: (data: { username: string; message: string }) => void;
+  onClose: () => void;
+};
+
+export type JoinRoomCardProps = {
+  roomId: string;
+  roomName: string;
+  participants: number;
+  onJoin: () => void;
+};

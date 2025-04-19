@@ -1,11 +1,5 @@
 import React from 'react';
-
-interface JoinRoomCardProps {
-  roomId: string;
-  roomName: string;
-  participants: number;
-  onJoin: () => void;
-}
+import { JoinRoomCardProps } from '../lib/type';
 
 const JoinRoomCard: React.FC<JoinRoomCardProps> = ({
   roomName,
