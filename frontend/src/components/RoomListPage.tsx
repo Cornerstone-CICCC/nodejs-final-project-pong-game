@@ -180,22 +180,25 @@ export default function RoomListPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div
+      className="container mx-auto px-4 py-8 min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: 'url(bg_white_compressed.jpg)' }}
+    >
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-2xl font-bold">Created Rooms</h1>
+        <h1 className="text-4xl font-bold w-1/3">Pong Game Arena</h1>
         <button
           onClick={() => setShowMakeRoomModal(true)}
-          className="border border-black px-4 py-2 rounded hover:bg-gray-100"
+          className="text-2xl border border-black px-4 py-2 rounded hover:bg-gray-100 w-1/3"
         >
           Make a new room
         </button>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 justify-end w-1/3">
           <button onClick={() => setShowProfileModal(true)}>
-            <CircleUserRound size={32} />
+            <CircleUserRound size={48} />
           </button>
           <button
             onClick={logout}
-            className="border border-black px-4 py-2 rounded hover:bg-gray-100"
+            className="text-2xl border border-black px-4 py-2 rounded hover:bg-gray-100"
           >
             Logout
           </button>
@@ -218,7 +221,7 @@ export default function RoomListPage() {
             </div>
           ))
         ) : (
-          <p className="text-gray-500">No rooms available</p>
+          <p className="text-gray-500 text-2xl">No rooms available</p>
         )}
       </div>
 

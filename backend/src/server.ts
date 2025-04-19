@@ -12,7 +12,6 @@ import roomRouter from './routes/room.routes';
 import userRoomRouter from './routes/user_room.routes';
 import { protectedRouter, publicRouter } from './routes/user.route';
 import { requireAuth } from './middlewares/auth.middleware';
-import roomsSocket from './socket/room.socket';
 dotenv.config();
 
 //Create server
@@ -73,7 +72,6 @@ mongoose
     console.log('Connected to MongoDB database');
 
     //Start socket
-    // roomsSocket(io);
     gameSocket(io);
 
     //Start server

@@ -1,35 +1,10 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface MakeRoomModalProps {
-  onClose: () => void;
-  // onRoomCreated: (roomId: string) => void;
-  createUserId: string;
-}
-
-type Room = {
-  _id: string;
-  room_name: string;
-  __v: number;
-};
-
-type UserRoom = {
-  _id: string;
-  room_id: string;
-  creator_user_id: string;
-  opponent_user_id: string | null;
-  __v: number;
-};
-
-type CreateRoomResponse = {
-  room: Room;
-  userRoom: UserRoom;
-};
+import { CreateRoomResponse, MakeRoomModalProps } from '../lib/type';
 
 const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
   onClose,
-  // onRoomCreated,
   createUserId,
 }) => {
   const [roomName, setRoomName] = useState('');
@@ -37,7 +12,6 @@ const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
   const navigate = useNavigate();
   const handleCreateRoom = async () => {
     try {
-      //create recode of room and user_room automatically / args: room_name, creator_user_id
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/rooms`,
         {
@@ -59,8 +33,6 @@ const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
 
       const data: CreateRoomResponse = await response.json();
 
-      // should use user_room id
-      // return object is room Object not user_room
       console.log('/api/rooms fetch date:', data);
       navigate(`/room/${data.userRoom._id}`);
 
@@ -92,11 +64,11 @@ const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
               value={roomName}
               onChange={e => setRoomName(e.target.value)}
               className="w-full px-4 py-3 text-black border border-black rounded-lg focus:outline-none"
-              placeholder="Gustavo's Room"
+              placeholder="Input room's name"
             />
           </div>
 
-          <div className="flex">
+          <div className="hidden">
             <button
               onClick={() => setRoomType('public')}
               className={`px-8 py-3 rounded-lg ${

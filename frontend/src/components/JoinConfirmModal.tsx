@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import UserProfile from './Profile';
-import { userRoomType, userType } from '../lib/type';
+import { JoinConfirmModalProps, userRoomType, userType } from '../lib/type';
 import { useNavigate } from 'react-router-dom';
-import { io } from 'socket.io-client';
-
-interface JoinConfirmModalProps {
-  currentUserId: string;
-  selectedRoomId: string;
-  onSaveProfile: (data: { username: string; message: string }) => void;
-  onClose: () => void;
-}
 
 const JoinConfirmModal: React.FC<JoinConfirmModalProps> = ({
   currentUserId,
@@ -18,7 +10,6 @@ const JoinConfirmModal: React.FC<JoinConfirmModalProps> = ({
   onSaveProfile,
 }) => {
   const navigate = useNavigate();
-  const socket = io(import.meta.env.VITE_BACKEND_URL);
   const [creatorUser, setCreatorUser] = useState<userType | null>(null);
   const [selectedUserRoomId, setSelectedUserRoomId] = useState<string>('');
 

@@ -42,7 +42,7 @@ type CurrentUserType = {
   username: string;
 };
 
-const socket: Socket = io('http://localhost:3500');
+const socket: Socket = io(import.meta.env.VITE_BACKEND_URL);
 
 function Game() {
   const { roomId } = useParams();
