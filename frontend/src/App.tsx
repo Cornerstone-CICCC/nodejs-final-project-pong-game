@@ -1,6 +1,5 @@
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
-// import DestopImage from '/background.jpg';
 import Login from './components/Login';
 import Register from './components/Register';
 import HomePage from './components/HomePage';
@@ -9,10 +8,7 @@ import Game from './components/Game';
 
 function App() {
   return (
-    <div
-    // className="text-white  h-[100vh] flex justify-center items-center bg-cover "
-    // style={{ backgroundImage: `url(${DestopImage})` }}
-    >
+    <div>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="login" element={<Login />} />
