@@ -90,13 +90,14 @@ const JoinConfirmModal: React.FC<JoinConfirmModalProps> = ({
                 user={creatorUser}
                 currentUserId={currentUserId}
                 onSaveProfile={onSaveProfile}
+                isShowsOnPublic={true}
               />
             ) : (
               <div>Loading user profile...</div>
             )}
           </div>
 
-          <div className="w-1/3 p-6 flex flex-col justify-between">
+          <div className="w-1/3 p-6 flex flex-col justify-center">
             <h2 className="text-xl font-bold mb-4">Join Room</h2>
             <p className="text-gray-600 mb-6">
               Are you sure you want to join this room?
@@ -104,13 +105,13 @@ const JoinConfirmModal: React.FC<JoinConfirmModalProps> = ({
             <div className="flex flex-col space-y-4">
               <button
                 onClick={handleJoinRoom}
-                className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-300 hover:text-black transition"
+                className="w-full px-4 py-2 bg-black text-white rounded-lg cursor-pointer hover:bg-gray-300 hover:text-black transition"
               >
                 Join
               </button>
               <button
                 onClick={onClose}
-                className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-300 hover:text-black transition"
+                className="w-full px-4 py-2 bg-black text-white rounded-lg cursor-pointer hover:bg-gray-300 hover:text-black transition"
               >
                 Cancel
               </button>

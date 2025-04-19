@@ -15,7 +15,7 @@ const JoinRoomCard: React.FC<JoinRoomCardProps> = ({
       <button
         onClick={onJoin}
         disabled={participants === 2}
-        className="px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-600 transition"
+        className="px-4 py-2 bg-gray-900 text-white font-medium rounded-lg cursor-pointer hover:bg-gray-600 transition"
       >
         {participants === 2 ? 'Room Full' : 'Join Room'}
       </button>

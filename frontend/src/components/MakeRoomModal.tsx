@@ -54,7 +54,7 @@ const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
               </label>
               <button
                 onClick={onClose}
-                className="text-gray-500 hover:text-gray-700 mb-3"
+                className="text-gray-500 cursor-pointer hover:text-gray-700 mb-3"
               >
                 <X />
               </button>
@@ -90,7 +90,7 @@ const MakeRoomModal: React.FC<MakeRoomModalProps> = ({
 
           <button
             onClick={handleCreateRoom}
-            className="w-full mt-6 px-4 py-4 border border-black text-black text-xl rounded-lg hover:bg-gray-300 transition-colors"
+            className="w-full mt-6 px-4 py-4 border border-black text-black text-xl rounded-lg cursor-pointer hover:bg-gray-300 transition-colors"
           >
             Start new Room
           </button>
