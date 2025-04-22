@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BiUser } from 'react-icons/bi';
 import { AiOutlineUnlock } from 'react-icons/ai';
 import { useState } from 'react';
-import DestopImage from '/background_compressed.jpg';
+import DestopImage from '/background_purple_login.png';
 
 function Login() {
   const [username, setUsername] = useState('');

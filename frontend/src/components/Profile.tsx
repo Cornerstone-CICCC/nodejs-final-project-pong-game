@@ -7,10 +7,12 @@ const UserProfile = ({
   user,
   currentUserId,
   onSaveProfile,
+  isShowsOnPublic = false
 }: {
   user: userType;
   currentUserId: string;
   onSaveProfile: (data: { username: string; message: string }) => void;
+  isShowsOnPublic: boolean
 }) => {
   const isOwnProfile = user._id === currentUserId;
 
@@ -140,7 +142,7 @@ const UserProfile = ({
         {isOwnProfile && !isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center space-x-1 bg-black text-white px-4 py-2 rounded hover:bg-gray-300 hover:text-black"
+            className="flex items-center space-x-1 bg-black text-white px-4 py-2 rounded cursor-pointer hover:bg-gray-300 hover:text-black"
           >
             <Edit size={16} />
             <span>Edit</span>
@@ -151,14 +153,14 @@ const UserProfile = ({
           <div className="flex space-x-2">
             <button
               onClick={handleCancel}
-              className="flex items-center space-x-1 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              className="flex items-center space-x-1 bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-pointer hover:bg-gray-400"
             >
               <X size={16} />
               <span>Cancel</span>
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center space-x-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              className="flex items-center space-x-1 bg-green-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-green-600"
             >
               <Save size={16} />
               <span>Save</span>
@@ -226,7 +228,7 @@ const UserProfile = ({
                   <th className="border border-gray-300 px-4 py-2">Date</th>
                   <th className="border border-gray-300 px-4 py-2">Opponent</th>
                   <th className="border border-gray-300 px-4 py-2">
-                    Your Score
+                    {isShowsOnPublic ? 'Score' : 'Your Score'}
                   </th>
                   <th className="border border-gray-300 px-4 py-2">
                     Opponent Score

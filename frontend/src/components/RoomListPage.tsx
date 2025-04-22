@@ -188,17 +188,17 @@ export default function RoomListPage() {
         <h1 className="text-4xl font-bold w-1/3">Pong Game Arena</h1>
         <button
           onClick={() => setShowMakeRoomModal(true)}
-          className="text-2xl border border-black px-4 py-2 rounded hover:bg-gray-100 w-1/3"
+          className="text-2xl border border-black px-4 py-2 rounded cursor-pointer hover:bg-gray-100 w-1/3"
         >
           Make a new room
         </button>
         <div className="flex items-center gap-4 justify-end w-1/3">
-          <button onClick={() => setShowProfileModal(true)}>
+          <button className='cursor-pointer' onClick={() => setShowProfileModal(true)}>
             <CircleUserRound size={48} />
           </button>
           <button
             onClick={logout}
-            className="text-2xl border border-black px-4 py-2 rounded hover:bg-gray-100"
+            className="text-2xl border border-black px-4 py-2 rounded cursor-pointer hover:bg-gray-100"
           >
             Logout
           </button>
@@ -250,10 +250,11 @@ export default function RoomListPage() {
               user={loginUser!}
               currentUserId={currentUser?.userId || ''}
               onSaveProfile={handleSaveProfile}
+              isShowsOnPublic={false}
             />
             <button
               onClick={() => setShowProfileModal(false)}
-              className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              className="mt-4 px-4 py-2 bg-red-500 text-white rounded cursor-pointer hover:bg-red-600"
             >
               Close
             </button>
